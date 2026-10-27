@@ -1,0 +1,18 @@
+@model Appointment
+@{
+    ViewData["Title"] = "Add appointment";
+}
+<section class="page-heading"><div><h1>Schedule appointment</h1><p>Choose a patient, veterinarian, and time for the visit.</p></div></section>
+<form asp-action="Create" method="post" class="form-card">
+    <p class="form-intro">The appointment will be added to the clinic schedule and the patient’s medical history.</p>
+    <div asp-validation-summary="ModelOnly"></div>
+    <div class="form-grid">
+        <div class="form-group"><label asp-for="PetId">Patient <span aria-hidden="true">*</span></label><select asp-for="PetId" asp-items="ViewBag.PetId" class="form-control"><option value="">Choose a pet</option></select><span asp-validation-for="PetId"></span></div>
+        <div class="form-group"><label asp-for="VeterinarianId">Veterinarian <span aria-hidden="true">*</span></label><select asp-for="VeterinarianId" asp-items="ViewBag.VeterinarianId" class="form-control"><option value="">Choose a veterinarian</option></select><span asp-validation-for="VeterinarianId"></span></div>
+        <div class="form-group"><label asp-for="AppointmentDate">Date and time <span aria-hidden="true">*</span></label><input asp-for="AppointmentDate" asp-format="{0:yyyy-MM-ddTHH:mm}" type="datetime-local" class="form-control" /><span asp-validation-for="AppointmentDate"></span></div>
+        <div class="form-group"><label asp-for="Status">Status</label><select asp-for="Status" asp-items="ViewBag.Status" class="form-control"></select><span asp-validation-for="Status"></span></div>
+        <div class="form-group full"><label asp-for="Diagnosis">Visit reason or preliminary diagnosis</label><textarea asp-for="Diagnosis" class="form-control" rows="3" placeholder="Add a short reason for the visit..."></textarea><span asp-validation-for="Diagnosis"></span></div>
+    </div>
+    <div class="form-actions"><a class="btn-secondary" asp-action="Index">Cancel</a><button type="submit" class="btn-primary">Save appointment</button></div>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

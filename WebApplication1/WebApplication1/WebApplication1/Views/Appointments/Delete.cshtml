@@ -1,0 +1,11 @@
+@model Appointment
+@{
+    ViewData["Title"] = "Delete appointment";
+}
+<section class="page-heading"><div><h1>Delete appointment</h1><p>Review the visit before removing it from the schedule.</p></div></section>
+<article class="confirm-card">
+    <h2>Remove this appointment?</h2>
+    <p>An appointment with recorded treatments cannot be removed so the medical record remains intact.</p>
+    <dl class="detail-list"><dt>Patient</dt><dd>@Model.Pet?.Name</dd><dt>Owner</dt><dd>@Model.Pet?.Owner?.FirstName @Model.Pet?.Owner?.LastName</dd><dt>Veterinarian</dt><dd>Dr. @Model.Veterinarian?.FirstName @Model.Veterinarian?.LastName</dd><dt>Date and time</dt><dd>@Model.AppointmentDate.ToString("MMMM d, yyyy · h:mm tt")</dd><dt>Visit reason</dt><dd>@(Model.Diagnosis ?? "—")</dd></dl>
+    <form asp-action="Delete" asp-route-id="@Model.AppointmentId" method="post" class="form-actions"><a class="btn-secondary" asp-action="Index">Cancel</a><button type="submit" class="btn-danger">Delete appointment</button></form>
+</article>

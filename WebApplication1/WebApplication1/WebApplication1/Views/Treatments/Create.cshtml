@@ -1,0 +1,16 @@
+@model Treatment
+@{
+    ViewData["Title"] = "Add treatment";
+}
+<section class="page-heading"><div><h1>Add treatment</h1><p>Record a procedure or medication for a visit.</p></div></section>
+<form asp-action="Create" method="post" class="form-card">
+    <p class="form-intro">Choose the appointment and enter the procedure name and price.</p>
+    <div asp-validation-summary="ModelOnly"></div>
+    <div class="form-grid">
+        <div class="form-group full"><label asp-for="AppointmentId">Appointment <span aria-hidden="true">*</span></label><select asp-for="AppointmentId" asp-items="ViewBag.AppointmentId" class="form-control"><option value="">Choose an appointment</option></select><span asp-validation-for="AppointmentId"></span></div>
+        <div class="form-group"><label asp-for="TreatmentName">Procedure or treatment <span aria-hidden="true">*</span></label><input asp-for="TreatmentName" class="form-control" placeholder="e.g. Vaccination" /><span asp-validation-for="TreatmentName"></span></div>
+        <div class="form-group"><label asp-for="Price">Price (лв.) <span aria-hidden="true">*</span></label><input asp-for="Price" class="form-control" type="number" min="0" step="0.01" /><span asp-validation-for="Price"></span><span class="field-hint">The price must be zero or greater.</span></div>
+    </div>
+    <div class="form-actions"><a class="btn-secondary" asp-action="Index">Cancel</a><button type="submit" class="btn-primary">Save treatment</button></div>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

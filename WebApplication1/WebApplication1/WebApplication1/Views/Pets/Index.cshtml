@@ -1,0 +1,41 @@
+@model IReadOnlyList<Pet>
+@{
+    ViewData["Title"] = "Pets";
+}
+<section class="page-heading">
+    <div><h1>Pets</h1><p>Every patient, every detail. Keep their care connected.</p><div class="heading-meta"><span><strong>@ViewData["PetCount"]</strong> patient records</span><span>Linked to their owners and visits</span></div></div>
+    <div class="heading-actions"><a class="btn-primary" asp-action="Create"><span aria-hidden="true">＋</span> Add pet</a></div>
+</section>
+<section class="panel">
+    <div class="panel-header"><div><h2>Patient directory</h2><p>Search by pet, breed, or owner.</p></div><span class="result-count">@Model.Count patients</span></div>
+    <div class="panel-body">
+        <div class="list-toolbar">
+            <form asp-action="Index" method="get" class="search-filter">
+                <label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg><input type="search" name="search" value="@ViewData["Search"]" placeholder="Search by pet name, breed, or owner..." aria-label="Search pets" /></label>
+                <button class="btn-secondary btn-small" type="submit">Search</button>
+            </form>
+        </div>
+        <div class="table-wrap"><table class="data-table">
+            <thead><tr><th>Pet</th><th>Species</th><th>Breed</th><th>Birth date</th><th>Owner</th><th>Actions</th></tr></thead>
+            <tbody>
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="6" class="empty-state">No pets found. Add a patient and connect it to an owner.</td></tr>
+            }
+            else
+            {
+                @foreach (var pet in Model)
+                {
+                    <tr>
+                        <td><span class="pet-avatar" aria-hidden="true">@(pet.Species == "Cat" ? "🐈" : "🐕")</span><span class="table-person"><span class="table-primary">@pet.Name</span><span class="table-secondary">@pet.Sex</span></span></td>
+                        <td>@pet.Species</td><td>@(string.IsNullOrWhiteSpace(pet.Breed) ? "—" : pet.Breed)</td><td>@(pet.BirthDate?.ToString("MMM d, yyyy") ?? "—")</td>
+                        <td><span class="table-primary">@pet.Owner?.FirstName @pet.Owner?.LastName</span><span class="table-secondary">@pet.Owner?.Phone</span></td>
+                        <td><div class="table-actions"><a class="action-link" asp-action="Edit" asp-route-id="@pet.PetId" title="Edit pet" aria-label="Edit @pet.Name">✎</a><a class="action-link delete" asp-action="Delete" asp-route-id="@pet.PetId" title="Delete pet" aria-label="Delete @pet.Name">⌫</a></div></td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table></div>
+        <div class="pagination-note"><span>Showing @Model.Count patient records</span><span>Every pet is connected to an owner.</span></div>
+    </div>
+</section>

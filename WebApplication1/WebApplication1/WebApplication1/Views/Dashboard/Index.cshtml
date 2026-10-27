@@ -1,0 +1,119 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    var hour = DateTime.Now.Hour;
+    var greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+}
+
+<section class="page-heading">
+    <div>
+        <h1>@greeting, @User.Identity?.Name?.Split('@')[0]!</h1>
+        <p>Here’s what’s happening at your clinic today.</p>
+    </div>
+    @if (User.IsInRole("Admin") || User.IsInRole("Receptionist"))
+    {
+        <div class="heading-actions"><a class="btn-primary" asp-controller="Appointments" asp-action="Create"><span aria-hidden="true">＋</span> Add appointment</a></div>
+    }
+</section>
+
+<section class="stats-grid" aria-label="Clinic overview">
+    <article class="stat-card">
+        <div><div class="stat-label">Total owners</div><div class="stat-value">@Model.OwnerCount</div><div class="stat-note">Registered in your clinic</div></div>
+        <span class="stat-icon" aria-hidden="true">♧</span>
+    </article>
+    <article class="stat-card">
+        <div><div class="stat-label">Total pets</div><div class="stat-value">@Model.PetCount</div><div class="stat-note">Patient records</div></div>
+        <span class="stat-icon" aria-hidden="true">♡</span>
+    </article>
+    <article class="stat-card">
+        <div><div class="stat-label">Veterinarians</div><div class="stat-value">@Model.VeterinarianCount</div><div class="stat-note">Care team members</div></div>
+        <span class="stat-icon" aria-hidden="true">✚</span>
+    </article>
+    <article class="stat-card">
+        <div><div class="stat-label">Upcoming appointments</div><div class="stat-value">@Model.UpcomingAppointmentCount</div><div class="stat-note">Scheduled from now</div></div>
+        <span class="stat-icon" aria-hidden="true">▣</span>
+    </article>
+</section>
+
+<section class="dashboard-grid">
+    <article class="panel">
+        <div class="panel-header">
+            <div><h2>Recent appointments</h2><p>Your next visits at a glance</p></div>
+            <a class="btn-link" asp-controller="Appointments" asp-action="Index">View all <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="panel-tabs">
+            <span class="panel-tab active">Upcoming · @Model.UpcomingAppointmentCount</span>
+            <span class="panel-tab">All appointments</span>
+        </div>
+        <div class="panel-body">
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Pet</th><th>Owner</th><th>Veterinarian</th><th>Time</th><th>Status</th></tr></thead>
+                    <tbody>
+                    @if (Model.Appointments.Count == 0)
+                    {
+                        <tr><td class="empty-state" colspan="5">There are no upcoming appointments. Add a visit to get started.</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var appointment in Model.Appointments)
+                        {
+                            var statusClass = appointment.Status.ToLowerInvariant().Replace(' ', '-');
+                            <tr>
+                                <td><span class="table-primary">@appointment.Pet?.Name</span><span class="table-secondary">@appointment.Pet?.Breed</span></td>
+                                <td>@appointment.Pet?.Owner?.FirstName @appointment.Pet?.Owner?.LastName</td>
+                                <td>Dr. @appointment.Veterinarian?.FirstName @appointment.Veterinarian?.LastName</td>
+                                <td><span class="table-primary">@appointment.AppointmentDate.ToString("h:mm tt")</span><span class="table-secondary">@appointment.AppointmentDate.ToString("MMM d")</span></td>
+                                <td><span class="status-pill status-@statusClass">@appointment.Status</span></td>
+                            </tr>
+                        }
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </article>
+
+    <aside class="dashboard-side">
+        <article class="panel">
+            <div class="panel-header"><div><h2>Quick actions</h2><p>Common clinic tasks</p></div></div>
+            <div class="quick-actions">
+                @if (User.IsInRole("Admin") || User.IsInRole("Receptionist"))
+                {
+                    <a class="btn-primary" asp-controller="Appointments" asp-action="Create"><span aria-hidden="true">▣</span> Add appointment</a>
+                    <a class="btn-secondary" asp-controller="Owners" asp-action="Create"><span aria-hidden="true">＋</span> Create owner</a>
+                }
+                <a class="btn-secondary" asp-controller="Pets" asp-action="Create"><span aria-hidden="true">♡</span> Add pet</a>
+            </div>
+        </article>
+
+        <article class="panel">
+            <div class="panel-header"><div><h2>Up next</h2><p>Your next scheduled visit</p></div></div>
+            <div class="next-card">
+                @if (Model.NextAppointment is null)
+                {
+                    <p class="form-intro">No visits are scheduled yet.</p>
+                    <a class="btn-link" asp-controller="Appointments" asp-action="Create">Schedule an appointment →</a>
+                }
+                else
+                {
+                    <div class="next-time">@Model.NextAppointment.AppointmentDate.ToString("h:mm tt · MMM d")</div>
+                    <div class="next-pet">
+                        <span class="pet-avatar" aria-hidden="true">@(Model.NextAppointment.Pet?.Species == "Cat" ? "🐈" : "🐕")</span>
+                        <span><strong>@Model.NextAppointment.Pet?.Name</strong><small>@Model.NextAppointment.Pet?.Species · @Model.NextAppointment.Pet?.Breed</small></span>
+                    </div>
+                    <div class="next-details">
+                        <div><small>OWNER</small>@Model.NextAppointment.Pet?.Owner?.FirstName @Model.NextAppointment.Pet?.Owner?.LastName</div>
+                        <div><small>VETERINARIAN</small>Dr. @Model.NextAppointment.Veterinarian?.LastName</div>
+                        <div><small>VISIT</small>@Model.NextAppointment.Diagnosis</div>
+                        <div><small>STATUS</small>@Model.NextAppointment.Status</div>
+                    </div>
+                    @if (User.IsInRole("Admin") || User.IsInRole("Receptionist"))
+                    {
+                        <a class="btn-link" asp-controller="Appointments" asp-action="Edit" asp-route-id="@Model.NextAppointment.AppointmentId">View appointment →</a>
+                    }
+                }
+            </div>
+        </article>
+    </aside>
+</section>

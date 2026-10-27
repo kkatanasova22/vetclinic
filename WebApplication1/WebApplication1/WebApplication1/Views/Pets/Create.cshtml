@@ -1,0 +1,19 @@
+@model Pet
+@{
+    ViewData["Title"] = "Add pet";
+}
+<section class="page-heading"><div><h1>Add pet</h1><p>Create a patient record and connect it to an owner.</p></div></section>
+<form asp-action="Create" method="post" class="form-card">
+    <p class="form-intro">Enter the patient’s details. A pet must be linked to an existing owner.</p>
+    <div asp-validation-summary="ModelOnly"></div>
+    <div class="form-grid">
+        <div class="form-group"><label asp-for="Name">Pet name <span aria-hidden="true">*</span></label><input asp-for="Name" class="form-control" placeholder="e.g. Rex" /><span asp-validation-for="Name"></span></div>
+        <div class="form-group"><label asp-for="Species">Species <span aria-hidden="true">*</span></label><select asp-for="Species" class="form-control"><option value="">Choose species</option><option>Dog</option><option>Cat</option><option>Rabbit</option><option>Bird</option><option>Other</option></select><span asp-validation-for="Species"></span></div>
+        <div class="form-group"><label asp-for="Breed">Breed</label><input asp-for="Breed" class="form-control" placeholder="e.g. German Shepherd" /><span asp-validation-for="Breed"></span></div>
+        <div class="form-group"><label asp-for="BirthDate">Birth date</label><input asp-for="BirthDate" asp-format="{0:yyyy-MM-dd}" type="date" class="form-control" /><span asp-validation-for="BirthDate"></span></div>
+        <div class="form-group"><label asp-for="Sex">Sex</label><select asp-for="Sex" class="form-control"><option value="">Not specified</option><option>Female</option><option>Male</option></select><span asp-validation-for="Sex"></span></div>
+        <div class="form-group"><label asp-for="OwnerId">Owner <span aria-hidden="true">*</span></label><select asp-for="OwnerId" asp-items="ViewBag.OwnerId" class="form-control"><option value="">Choose owner</option></select><span asp-validation-for="OwnerId"></span></div>
+    </div>
+    <div class="form-actions"><a class="btn-secondary" asp-action="Index">Cancel</a><button type="submit" class="btn-primary">Save pet</button></div>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

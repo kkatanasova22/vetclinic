@@ -1,0 +1,40 @@
+@model IReadOnlyList<Appointment>
+@{
+    ViewData["Title"] = "Appointments";
+}
+<section class="page-heading">
+    <div><h1>Appointments</h1><p>Keep visits, patients, and care teams in sync.</p><div class="heading-meta"><span><strong>@ViewData["AppointmentCount"]</strong> appointments</span><span>All visits in one place</span></div></div>
+    <div class="heading-actions"><a class="btn-primary" asp-action="Create"><span aria-hidden="true">＋</span> Add appointment</a></div>
+</section>
+<section class="panel">
+    <div class="panel-header"><div><h2>Appointment schedule</h2><p>Search by pet, owner, veterinarian, or visit reason.</p></div><span class="result-count">@Model.Count shown</span></div>
+    <div class="panel-body">
+        <div class="list-toolbar"><form asp-action="Index" method="get" class="search-filter"><label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg><input type="search" name="search" value="@ViewData["Search"]" placeholder="Search appointments..." aria-label="Search appointments" /></label><button class="btn-secondary btn-small" type="submit">Search</button></form></div>
+        <div class="table-wrap"><table class="data-table">
+            <thead><tr><th>Date &amp; time</th><th>Pet</th><th>Owner</th><th>Veterinarian</th><th>Visit reason</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="7" class="empty-state">No appointments found. Schedule a visit to start a care record.</td></tr>
+            }
+            else
+            {
+                @foreach (var appointment in Model)
+                {
+                    var statusClass = appointment.Status.ToLowerInvariant().Replace(' ', '-');
+                    <tr>
+                        <td><span class="table-primary">@appointment.AppointmentDate.ToString("MMM d, yyyy")</span><span class="table-secondary">@appointment.AppointmentDate.ToString("h:mm tt")</span></td>
+                        <td><span class="table-primary">@appointment.Pet?.Name</span><span class="table-secondary">@appointment.Pet?.Species · @appointment.Pet?.Breed</span></td>
+                        <td>@appointment.Pet?.Owner?.FirstName @appointment.Pet?.Owner?.LastName</td>
+                        <td>Dr. @appointment.Veterinarian?.FirstName @appointment.Veterinarian?.LastName</td>
+                        <td>@(string.IsNullOrWhiteSpace(appointment.Diagnosis) ? "—" : appointment.Diagnosis)</td>
+                        <td><span class="status-pill status-@statusClass">@appointment.Status</span></td>
+                        <td><div class="table-actions"><a class="action-link" asp-action="Edit" asp-route-id="@appointment.AppointmentId" title="Edit appointment" aria-label="Edit appointment for @appointment.Pet?.Name">✎</a><a class="action-link delete" asp-action="Delete" asp-route-id="@appointment.AppointmentId" title="Delete appointment" aria-label="Delete appointment for @appointment.Pet?.Name">⌫</a></div></td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table></div>
+        <div class="pagination-note"><span>Showing @Model.Count appointments</span><span>Appointments with recorded treatments cannot be deleted.</span></div>
+    </div>
+</section>

@@ -1,0 +1,17 @@
+@model Owner
+@{
+    ViewData["Title"] = "Add owner";
+}
+<section class="page-heading"><div><h1>Add owner</h1><p>Create a client record before adding their pet.</p></div></section>
+<form asp-action="Create" method="post" class="form-card">
+    <p class="form-intro">Enter the owner’s contact details. The email address must be unique in your clinic.</p>
+    <div asp-validation-summary="ModelOnly"></div>
+    <div class="form-grid">
+        <div class="form-group"><label asp-for="FirstName">First name <span aria-hidden="true">*</span></label><input asp-for="FirstName" class="form-control" autocomplete="given-name" /><span asp-validation-for="FirstName"></span></div>
+        <div class="form-group"><label asp-for="LastName">Last name <span aria-hidden="true">*</span></label><input asp-for="LastName" class="form-control" autocomplete="family-name" /><span asp-validation-for="LastName"></span></div>
+        <div class="form-group"><label asp-for="Email">Email address <span aria-hidden="true">*</span></label><input asp-for="Email" class="form-control" type="email" autocomplete="email" /><span asp-validation-for="Email"></span></div>
+        <div class="form-group"><label asp-for="Phone">Phone number <span aria-hidden="true">*</span></label><input asp-for="Phone" class="form-control" type="tel" autocomplete="tel" /><span asp-validation-for="Phone"></span></div>
+    </div>
+    <div class="form-actions"><a class="btn-secondary" asp-action="Index">Cancel</a><button type="submit" class="btn-primary">Save owner</button></div>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

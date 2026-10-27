@@ -1,0 +1,7 @@
+# Local SQLite database and transient application files
+WebApplication1/WebApplication1/WebApplication1/Data/*.db
+WebApplication1/WebApplication1/WebApplication1/Data/*.db-shm
+WebApplication1/WebApplication1/WebApplication1/Data/*.db-wal
+WebApplication1/WebApplication1/WebApplication1/Data/DataProtectionKeys/
+**/bin/
+**/obj/

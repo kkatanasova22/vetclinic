@@ -1,0 +1,11 @@
+@model Pet
+@{
+    ViewData["Title"] = "Delete pet";
+}
+<section class="page-heading"><div><h1>Delete pet</h1><p>Review the patient record before removing it.</p></div></section>
+<article class="confirm-card">
+    <h2>Remove @Model.Name?</h2>
+    <p>Pets with appointment history cannot be deleted so their medical records remain connected.</p>
+    <dl class="detail-list"><dt>Species</dt><dd>@Model.Species</dd><dt>Breed</dt><dd>@(Model.Breed ?? "—")</dd><dt>Owner</dt><dd>@Model.Owner?.FirstName @Model.Owner?.LastName</dd></dl>
+    <form asp-action="Delete" asp-route-id="@Model.PetId" method="post" class="form-actions"><a class="btn-secondary" asp-action="Index">Cancel</a><button type="submit" class="btn-danger">Delete pet</button></form>
+</article>

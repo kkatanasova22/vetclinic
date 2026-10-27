@@ -1,0 +1,18 @@
+@model Owner
+@{
+    ViewData["Title"] = "Edit owner";
+}
+<section class="page-heading"><div><h1>Edit owner</h1><p>Update the contact details for @Model.FirstName @Model.LastName.</p></div></section>
+<form asp-action="Edit" asp-route-id="@Model.OwnerId" method="post" class="form-card">
+    <input asp-for="OwnerId" type="hidden" />
+    <p class="form-intro">The email address must remain unique in your clinic.</p>
+    <div asp-validation-summary="ModelOnly"></div>
+    <div class="form-grid">
+        <div class="form-group"><label asp-for="FirstName">First name <span aria-hidden="true">*</span></label><input asp-for="FirstName" class="form-control" /><span asp-validation-for="FirstName"></span></div>
+        <div class="form-group"><label asp-for="LastName">Last name <span aria-hidden="true">*</span></label><input asp-for="LastName" class="form-control" /><span asp-validation-for="LastName"></span></div>
+        <div class="form-group"><label asp-for="Email">Email address <span aria-hidden="true">*</span></label><input asp-for="Email" class="form-control" type="email" /><span asp-validation-for="Email"></span></div>
+        <div class="form-group"><label asp-for="Phone">Phone number <span aria-hidden="true">*</span></label><input asp-for="Phone" class="form-control" type="tel" /><span asp-validation-for="Phone"></span></div>
+    </div>
+    <div class="form-actions"><a class="btn-secondary" asp-action="Index">Cancel</a><button type="submit" class="btn-primary">Save changes</button></div>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

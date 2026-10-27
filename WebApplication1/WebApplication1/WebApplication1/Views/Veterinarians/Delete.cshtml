@@ -1,0 +1,11 @@
+@model Veterinarian
+@{
+    ViewData["Title"] = "Delete veterinarian";
+}
+<section class="page-heading"><div><h1>Delete veterinarian</h1><p>Review the staff record before removing it.</p></div></section>
+<article class="confirm-card">
+    <h2>Remove Dr. @Model.FirstName @Model.LastName?</h2>
+    <p>Veterinarians with scheduled or past visits cannot be deleted so appointment history remains intact.</p>
+    <dl class="detail-list"><dt>Specialty</dt><dd>@(Model.Specialty ?? "General practice")</dd></dl>
+    <form asp-action="Delete" asp-route-id="@Model.VeterinarianId" method="post" class="form-actions"><a class="btn-secondary" asp-action="Index">Cancel</a><button type="submit" class="btn-danger">Delete veterinarian</button></form>
+</article>

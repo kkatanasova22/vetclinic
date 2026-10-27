@@ -1,25 +1,22 @@
-﻿namespace WebApplication1.Models;
 using System.ComponentModel.DataAnnotations;
+
+namespace WebApplication1.Models;
 
 public class Owner
 {
-    public int OwnerID { get; set; }
+    public int OwnerId { get; set; }
 
-    [Required]
-    [StringLength(50, MinimumLength = 2)]
-    public string FirstName { get; set; }
+    [Required, StringLength(50, MinimumLength = 2)]
+    public string FirstName { get; set; } = string.Empty;
 
-    [Required]
-    [StringLength(50, MinimumLength = 2)]
-    public string LastName { get; set; }
+    [Required, StringLength(50, MinimumLength = 2)]
+    public string LastName { get; set; } = string.Empty;
 
-    [Required]
-    [EmailAddress]
-    public string Email { get; set; }
+    [Required, EmailAddress, StringLength(100)]
+    public string Email { get; set; } = string.Empty;
 
-    [Required]
-    [RegularExpression(@"^[0-9]{8,15}$")]
-    public string Phone { get; set; }
+    [Required, Phone, StringLength(20)]
+    public string Phone { get; set; } = string.Empty;
 
-    public ICollection<Pet>? Pets { get; set; }
+    public ICollection<Pet> Pets { get; set; } = new List<Pet>();
 }

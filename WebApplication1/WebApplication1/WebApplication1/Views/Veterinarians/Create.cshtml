@@ -1,0 +1,15 @@
+@model Veterinarian
+@{
+    ViewData["Title"] = "Add veterinarian";
+}
+<section class="page-heading"><div><h1>Add veterinarian</h1><p>Add a member of your medical team.</p></div></section>
+<form asp-action="Create" method="post" class="form-card">
+    <div asp-validation-summary="ModelOnly"></div>
+    <div class="form-grid">
+        <div class="form-group"><label asp-for="FirstName">First name <span aria-hidden="true">*</span></label><input asp-for="FirstName" class="form-control" /><span asp-validation-for="FirstName"></span></div>
+        <div class="form-group"><label asp-for="LastName">Last name <span aria-hidden="true">*</span></label><input asp-for="LastName" class="form-control" /><span asp-validation-for="LastName"></span></div>
+        <div class="form-group full"><label asp-for="Specialty">Specialty</label><input asp-for="Specialty" class="form-control" placeholder="e.g. Surgery, Internal medicine" /><span asp-validation-for="Specialty"></span></div>
+    </div>
+    <div class="form-actions"><a class="btn-secondary" asp-action="Index">Cancel</a><button type="submit" class="btn-primary">Add veterinarian</button></div>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

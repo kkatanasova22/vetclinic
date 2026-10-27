@@ -1,47 +1,129 @@
-﻿<!DOCTYPE html>
+@{
+    var signedIn = User.Identity?.IsAuthenticated == true;
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var pageTitle = ViewData["Title"]?.ToString() ?? "Dashboard";
+    var userName = User.Identity?.Name ?? "Clinic staff";
+    var userInitial = userName.FirstOrDefault().ToString().ToUpperInvariant();
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>@ViewData["Title"] - WebApplication1</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="~/WebApplication1.styles.css" asp-append-version="true"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@pageTitle · VetClinic</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
-<body>
-<header>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-        <div class="container-fluid">
-            <a class="navbar-brand" asp-area="" asp-controller="Owners" asp-action="Index">WebApplication1</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Owners" asp-action="Index">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Owners" asp-action="Privacy">Privacy</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-</header>
-<div class="container">
-    <main role="main" class="pb-3">
-        @RenderBody()
-    </main>
-</div>
+<body class="@(signedIn ? "app-body" : "auth-body")">
+@if (signedIn)
+{
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a class="brand" asp-controller="Dashboard" asp-action="Index">
+                <span class="brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M8.2 10.2c1.2 0 2-1.3 1.7-2.7-.2-1.4-1.1-2.4-2.3-2.4S5.7 6.2 6 7.6c.3 1.5 1 2.6 2.2 2.6Zm7.6 0c1.2 0 2-1.1 2.2-2.6.3-1.4-.4-2.5-1.6-2.5s-2.1 1-2.3 2.4c-.3 1.4.5 2.7 1.7 2.7ZM4.7 14c1 0 1.7-1 1.6-2.2-.1-1.2-.9-2-1.9-1.9-.9.1-1.5 1.2-1.4 2.4.1 1.1.8 1.8 1.7 1.7Zm14.6 0c.9.1 1.6-.6 1.7-1.7.1-1.2-.5-2.3-1.4-2.4-1-.1-1.8.7-1.9 1.9-.1 1.2.6 2.2 1.6 2.2Zm-7.3 6c2.5 0 5.1-.8 5.1-2.7 0-1.6-1.7-3.5-3.2-4.5-.7-.5-1.3-.7-1.9-.7s-1.2.2-1.9.7c-1.5 1-3.2 2.9-3.2 4.5 0 1.9 2.6 2.7 5.1 2.7Z" /></svg>
+                </span>
+                <span>VetClinic</span>
+            </a>
 
-<footer class="border-top footer text-muted">
-    <div class="container">
-        &copy; 2026 - WebApplication1 - <a asp-area="" asp-controller="Owners" asp-action="Privacy">Privacy</a>
+            <div class="clinic-switcher">
+                <span class="clinic-avatar">OC</span>
+                <span class="clinic-copy"><strong>Oakwood Veterinary</strong><small>Clinic workspace</small></span>
+                <span class="switch-chevron">⌄</span>
+            </div>
+
+            <div class="nav-caption">WORKSPACE</div>
+            <nav class="side-nav" aria-label="Main navigation">
+                <a class="nav-link @(controller == "Dashboard" ? "active" : "")" asp-controller="Dashboard" asp-action="Index">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>
+                    <span>Dashboard</span>
+                </a>
+                @if (User.IsInRole("Admin") || User.IsInRole("Receptionist"))
+                {
+                    <a class="nav-link @(controller == "Owners" ? "active" : "")" asp-controller="Owners" asp-action="Index">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.3-3 2.5-4.7 5.5-4.7s5.2 1.7 5.5 4.7M16 5.3a3 3 0 0 1 0 5.7m1.2 3.4c2.2.6 3.4 2 3.6 4.6"/></svg>
+                        <span>Owners</span>
+                    </a>
+                }
+                @if (User.IsInRole("Admin") || User.IsInRole("Receptionist") || User.IsInRole("Veterinarian"))
+                {
+                    <a class="nav-link @(controller == "Pets" ? "active" : "")" asp-controller="Pets" asp-action="Index">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.2c-3.4 0-6.4-1-6.4-3.5 0-2.2 2.4-4 4.4-5.1.8-.5 1.4-.7 2-.7s1.2.2 2 .7c2 1.1 4.4 2.9 4.4 5.1 0 2.5-3 3.5-6.4 3.5Z"/><circle cx="5.4" cy="8.4" r="1.8"/><circle cx="9.4" cy="5.7" r="1.8"/><circle cx="14.6" cy="5.7" r="1.8"/><circle cx="18.6" cy="8.4" r="1.8"/></svg>
+                        <span>Pets</span>
+                    </a>
+                }
+                @if (User.IsInRole("Admin"))
+                {
+                    <a class="nav-link @(controller == "Veterinarians" ? "active" : "")" asp-controller="Veterinarians" asp-action="Index">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"/><path d="M5 20v-1.5a7 7 0 0 1 14 0V20M12 11.5v4m-2-2h4"/></svg>
+                        <span>Veterinarians</span>
+                    </a>
+                }
+                @if (User.IsInRole("Admin") || User.IsInRole("Receptionist"))
+                {
+                    <a class="nav-link @(controller == "Appointments" ? "active" : "")" asp-controller="Appointments" asp-action="Index">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="15" rx="2"/><path d="M7.5 3.5v4m9-4v4m-13 2.5h17M8 12h2m4 0h2m-8 4h2"/></svg>
+                        <span>Appointments</span>
+                    </a>
+                }
+                @if (User.IsInRole("Admin") || User.IsInRole("Veterinarian"))
+                {
+                    <a class="nav-link @(controller == "Treatments" ? "active" : "")" asp-controller="Treatments" asp-action="Index">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3.5h8l3 3V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1h2Z"/><path d="M8 3.5v4h8v-4M8.5 12h7m-7 3.5h7"/></svg>
+                        <span>Treatments</span>
+                    </a>
+                }
+            </nav>
+
+            <div class="sidebar-spacer"></div>
+            <div class="support-card">
+                <span class="support-icon">♡</span>
+                <strong>A little help, anytime.</strong>
+                <p>Our support team is here for your clinic.</p>
+                <a href="mailto:support@vetclinic.local">Contact support <span aria-hidden="true">›</span></a>
+            </div>
+            <div class="sidebar-bottom">
+                <span class="settings-symbol" aria-hidden="true">⚙</span>
+                <span>Settings</span>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="logout-form">
+                    <button type="submit" class="logout-button">Sign out</button>
+                </form>
+            </div>
+            <div class="sidebar-footnote">© 2026 VetClinic · Built for better care</div>
+        </aside>
+
+        <div class="workspace">
+            <header class="topbar">
+                <div class="breadcrumbs"><span>Workspace</span><span class="crumb-separator">›</span><strong>@pageTitle</strong></div>
+                <div class="topbar-right">
+                    <span class="today-date">@DateTime.Now.ToString("dddd, MMMM d, yyyy")</span>
+                    <button class="icon-button" type="button" aria-label="Notifications"><span aria-hidden="true">♧</span><i></i></button>
+                    <span class="user-avatar">@userInitial</span>
+                    <span class="user-menu"><strong>@userName.Split('@')[0]</strong><small>Clinic staff</small></span>
+                    <span class="switch-chevron">⌄</span>
+                </div>
+            </header>
+
+            <main class="page-content">
+                @if (TempData["Success"] is string successMessage)
+                {
+                    <div class="alert alert-success" role="status">@successMessage</div>
+                }
+                @if (TempData["Error"] is string errorMessage)
+                {
+                    <div class="alert alert-error" role="alert">@errorMessage</div>
+                }
+                @RenderBody()
+            </main>
+            <footer class="workspace-footer"><span>© 2026 VetClinic. Caring for every companion.</span><span>All systems operational</span></footer>
+        </div>
     </div>
-</footer>
+}
+else
+{
+    <main class="auth-page">@RenderBody()</main>
+}
+
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
