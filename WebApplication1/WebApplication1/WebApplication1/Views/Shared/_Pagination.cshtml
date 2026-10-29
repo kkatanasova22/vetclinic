@@ -1,0 +1,26 @@
+@model PageInfo
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var sharedRoutes = new Dictionary<string, string>();
+    if (!string.IsNullOrWhiteSpace(Model.Search)) sharedRoutes["search"] = Model.Search;
+    if (!string.IsNullOrWhiteSpace(Model.Sort)) sharedRoutes["sort"] = Model.Sort;
+    if (!string.IsNullOrWhiteSpace(Model.Status)) sharedRoutes["status"] = Model.Status;
+    if (!string.IsNullOrWhiteSpace(Model.Category)) sharedRoutes["species"] = Model.Category;
+    var previousRoutes = new Dictionary<string, string>(sharedRoutes) { ["page"] = (Model.Page - 1).ToString() };
+    var nextRoutes = new Dictionary<string, string>(sharedRoutes) { ["page"] = (Model.Page + 1).ToString() };
+}
+@if (Model.TotalPages > 1)
+{
+    <nav class="page-links" aria-label="Pages">
+        @if (Model.Page > 1)
+        {
+            <a class="btn-secondary btn-small" asp-controller="@controller" asp-action="@action" asp-all-route-data="previousRoutes">Previous</a>
+        }
+        <span>Page @Model.Page of @Model.TotalPages</span>
+        @if (Model.Page < Model.TotalPages)
+        {
+            <a class="btn-secondary btn-small" asp-controller="@controller" asp-action="@action" asp-all-route-data="nextRoutes">Next</a>
+        }
+    </nav>
+}

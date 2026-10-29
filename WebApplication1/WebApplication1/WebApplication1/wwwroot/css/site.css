@@ -256,3 +256,65 @@ textarea.form-control { min-height: 90px; resize: vertical; }
   .login-form-panel h2 { font-size: 21px; }
   .auth-footer { padding-top: 19px; }
 }
+
+/* Малко по-едър текст и съдържание за по-лесно четене. */
+html { font-size: 16px; }
+body { font-size: 15px; }
+.page-content { zoom: 1.04; }
+.brand { font-size: 18px; }
+.nav-link { font-size: 14px; }
+.clinic-copy strong, .support-card strong { font-size: 13px; }
+.clinic-copy small, .user-menu small, .sidebar-footnote { font-size: 11px; }
+.nav-caption { font-size: 10px; }
+.breadcrumbs { font-size: 13px; }
+.today-date { font-size: 12px; }
+.user-menu strong { font-size: 12px; }
+.page-heading h1 { font-size: 25px; }
+.page-heading p { font-size: 13px; }
+.heading-meta { font-size: 12px; }
+.btn-primary, .btn-secondary, .btn-danger, .btn-link { font-size: 12px; }
+.btn-small { font-size: 11px; }
+.stat-label { font-size: 12px; }
+.stat-note { font-size: 11px; }
+.panel-header h2 { font-size: 14px; }
+.panel-header p { font-size: 11px; }
+.panel-tab { font-size: 11px; }
+.next-card h3 { font-size: 12px; }
+.next-card .next-time { font-size: 11px; }
+.next-pet strong { font-size: 12px; }
+.next-pet small, .next-details { font-size: 11px; }
+.next-details small { font-size: 10px; }
+.search-box input, .filter-select { font-size: 12px; }
+.result-count { font-size: 11px; }
+.data-table th { font-size: 10px; }
+.data-table td { font-size: 12px; }
+.table-primary { font-size: 12px; }
+.table-secondary { font-size: 11px; }
+.owner-avatar { font-size: 10px; }
+.pagination-note { font-size: 11px; }
+.status-pill { font-size: 10px; }
+.form-intro { font-size: 12px; }
+.form-group label, .form-control { font-size: 12px; }
+.field-hint { font-size: 11px; }
+.validation-summary-errors, .field-validation-error { font-size: 11px; }
+.detail-list, .alert { font-size: 12px; }
+.login-form-panel > p { font-size: 13px; }
+.login-form-panel .form-group label, .login-form-panel .form-control { font-size: 13px; }
+.login-meta, .login-protected { font-size: 11px; }
+.auth-footer { font-size: 11px; }
+.register-prompt { margin: 16px 0 0; color: #788595; font-size: 13px; }
+.register-prompt a { color: #2388bd; font-weight: 700; }
+.register-card { width: min(720px, 100%); padding: 30px; border: 1px solid #e9eef2; border-radius: 15px; background: #fff; box-shadow: 0 18px 55px rgba(34, 58, 79, .1); }
+.register-card h1 { margin: 18px 0 7px; font-size: 25px; }
+.register-card > p { margin: 0 0 20px; color: #8995a2; font-size: 13px; }
+.page-links { display: flex; align-items: center; justify-content: center; gap: 12px; padding-top: 12px; color: #718091; font-size: 12px; }
+.file-link { display: block; margin-top: 4px; color: #287da5; font-size: 11px; overflow-wrap: anywhere; }
+.file-thumbnail { width: 56px; height: 56px; margin: 5px 5px 0 0; border: 1px solid var(--line); border-radius: 7px; object-fit: cover; vertical-align: middle; }
+
+@media (max-width: 600px) {
+  .page-content { zoom: 1.02; }
+  .register-card { padding: 20px 16px; }
+  .register-card .form-grid { grid-template-columns: 1fr; }
+  .register-card .form-group.full { grid-column: auto; }
+  .page-links { flex-wrap: wrap; }
+}

@@ -4,6 +4,7 @@ namespace WebApplication1.Models;
 
 public class Pet
 {
+    // Животното е свързано със собственик и може да има прегледи.
     public int PetId { get; set; }
 
     [Required, StringLength(50, MinimumLength = 2)]

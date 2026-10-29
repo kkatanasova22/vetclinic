@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebApplication1.Models;
 
+// Процедурата е част от един преглед и има проверена цена.
 public class Treatment
 {
     public int TreatmentId { get; set; }

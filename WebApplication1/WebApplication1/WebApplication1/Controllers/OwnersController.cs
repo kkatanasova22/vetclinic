@@ -9,11 +9,13 @@ namespace WebApplication1.Controllers;
 [Authorize(Roles = "Admin,Receptionist")]
 public class OwnersController : Controller
 {
+    private const int PageSize = 10;
     private readonly VetClinicDbContext _context;
 
     public OwnersController(VetClinicDbContext context) => _context = context;
 
-    public async Task<IActionResult> Index(string? search)
+    // Търсим и подреждаме собствениците в заявката към базата.
+    public async Task<IActionResult> Index(string? search, string? sort, int page = 1)
     {
         var owners = _context.Owners.AsNoTracking().Include(owner => owner.Pets).AsQueryable();
         if (!string.IsNullOrWhiteSpace(search))
@@ -25,17 +27,28 @@ public class OwnersController : Controller
                 || owner.Phone.Contains(term));
         }
 
+        page = Math.Max(1, page);
+        var total = await owners.CountAsync();
+        var totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)PageSize));
+        page = Math.Min(page, totalPages);
+        owners = sort == "email"
+            ? owners.OrderBy(owner => owner.Email)
+            : owners.OrderBy(owner => owner.LastName).ThenBy(owner => owner.FirstName);
         ViewData["Search"] = search;
+        ViewData["Sort"] = sort;
         ViewData["OwnerCount"] = await _context.Owners.CountAsync();
         ViewData["PetCount"] = await _context.Pets.CountAsync();
-        return View(await owners.OrderBy(owner => owner.LastName).ThenBy(owner => owner.FirstName).ToListAsync());
+        ViewData["PageInfo"] = new PageInfo { Page = page, TotalPages = totalPages, Search = search, Sort = sort };
+        return View(await owners.Skip((page - 1) * PageSize).Take(PageSize).ToListAsync());
     }
 
     [HttpGet]
+    // Показва празна форма за нов собственик.
     public IActionResult Create() => View(new Owner());
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    // Проверява имейла и записва новия собственик.
     public async Task<IActionResult> Create([Bind("FirstName,LastName,Email,Phone")] Owner owner)
     {
         owner.Email = owner.Email.Trim().ToLowerInvariant();
@@ -56,6 +69,7 @@ public class OwnersController : Controller
     }
 
     [HttpGet]
+    // Зарежда съществуващия собственик за редакция.
     public async Task<IActionResult> Edit(int id)
     {
         var owner = await _context.Owners.FindAsync(id);
@@ -64,6 +78,7 @@ public class OwnersController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    // Записва промените само ако имейлът не се ползва от друг собственик.
     public async Task<IActionResult> Edit(int id, [Bind("OwnerId,FirstName,LastName,Email,Phone")] Owner owner)
     {
         if (id != owner.OwnerId)
@@ -89,6 +104,7 @@ public class OwnersController : Controller
     }
 
     [HttpGet]
+    // Показва данните и любимците преди изтриване.
     public async Task<IActionResult> Delete(int id)
     {
         var owner = await _context.Owners
@@ -100,6 +116,7 @@ public class OwnersController : Controller
 
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
+    // Не изтрива собственик, към когото още има свързани любимци.
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var owner = await _context.Owners.Include(existing => existing.Pets).FirstOrDefaultAsync(existing => existing.OwnerId == id);

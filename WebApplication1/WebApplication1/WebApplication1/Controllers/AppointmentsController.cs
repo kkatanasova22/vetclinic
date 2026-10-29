@@ -1,26 +1,43 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data;
 using WebApplication1.Models;
+using WebApplication1.Services;
 
 namespace WebApplication1.Controllers;
 
-[Authorize(Roles = "Admin,Receptionist")]
+[Authorize(Roles = "Admin,Receptionist,Client")]
 public class AppointmentsController : Controller
 {
+    private const int PageSize = 10;
     private static readonly string[] StatusOptions = ["Confirmed", "In progress", "Completed", "Cancelled"];
     private readonly VetClinicDbContext _context;
+    private readonly FileStorageService _fileStorage;
 
-    public AppointmentsController(VetClinicDbContext context) => _context = context;
+    public AppointmentsController(VetClinicDbContext context, FileStorageService fileStorage)
+    {
+        _context = context;
+        _fileStorage = fileStorage;
+    }
 
-    public async Task<IActionResult> Index(string? search)
+    // Клиентът вижда само своите часове; търсенето и филтрите се изпълняват в базата.
+    public async Task<IActionResult> Index(string? search, string? status, string? sort, int page = 1)
     {
         var appointments = _context.Appointments.AsNoTracking()
             .Include(appointment => appointment.Pet).ThenInclude(pet => pet!.Owner)
             .Include(appointment => appointment.Veterinarian)
+            .Include(appointment => appointment.Files)
             .AsQueryable();
+
+        if (User.IsInRole("Client"))
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            appointments = appointments.Where(appointment => appointment.Pet!.Owner!.ClientProfile!.UserId == userId);
+        }
+
         if (!string.IsNullOrWhiteSpace(search))
         {
             var term = search.Trim();
@@ -30,9 +47,29 @@ public class AppointmentsController : Controller
                 || (appointment.Diagnosis != null && appointment.Diagnosis.Contains(term)));
         }
 
+        if (!string.IsNullOrWhiteSpace(status) && StatusOptions.Contains(status, StringComparer.Ordinal))
+        {
+            appointments = appointments.Where(appointment => appointment.Status == status);
+        }
+
+        page = Math.Max(1, page);
+        var total = await appointments.CountAsync();
+        var totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)PageSize));
+        page = Math.Min(page, totalPages);
+        appointments = sort switch
+        {
+            "date-desc" => appointments.OrderByDescending(appointment => appointment.AppointmentDate),
+            "status" => appointments.OrderBy(appointment => appointment.Status).ThenBy(appointment => appointment.AppointmentDate),
+            _ => appointments.OrderBy(appointment => appointment.AppointmentDate)
+        };
+
         ViewData["Search"] = search;
-        ViewData["AppointmentCount"] = await _context.Appointments.CountAsync();
-        return View(await appointments.OrderBy(appointment => appointment.AppointmentDate).ToListAsync());
+        ViewData["Status"] = status;
+        ViewData["Sort"] = sort;
+        ViewData["AppointmentCount"] = total;
+        ViewData["StatusOptions"] = StatusOptions;
+        ViewData["PageInfo"] = new PageInfo { Page = page, TotalPages = totalPages, Search = search, Status = status, Sort = sort };
+        return View(await appointments.Skip((page - 1) * PageSize).Take(PageSize).ToListAsync());
     }
 
     [HttpGet]
@@ -42,12 +79,23 @@ public class AppointmentsController : Controller
         return View(new Appointment { AppointmentDate = DateTime.Now.AddHours(1), Status = "Confirmed" });
     }
 
+    // Записваме часа и прикачените файлове; при невалиден файл махаме незавършения час.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("PetId,VeterinarianId,AppointmentDate,Diagnosis,Status")] Appointment appointment)
+    [RequestSizeLimit(60_000_000)]
+    public async Task<IActionResult> Create(
+        [Bind("PetId,VeterinarianId,AppointmentDate,Diagnosis,Status")] Appointment appointment,
+        List<IFormFile>? files,
+        CancellationToken cancellationToken)
     {
+        if (User.IsInRole("Client"))
+        {
+            appointment.Status = "Confirmed";
+        }
+
         ValidateStatus(appointment.Status);
         await ValidateReferencesAsync(appointment);
+        ValidateFileList(files);
         if (!ModelState.IsValid)
         {
             await LoadFormOptionsAsync(appointment.PetId, appointment.VeterinarianId, appointment.Status);
@@ -56,10 +104,40 @@ public class AppointmentsController : Controller
 
         _context.Appointments.Add(appointment);
         await _context.SaveChangesAsync();
+
+        var savedFiles = new List<ClinicFile>();
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            foreach (var upload in files ?? [])
+            {
+                var file = await _fileStorage.SaveAsync(upload, appointment.AppointmentId, userId, cancellationToken);
+                savedFiles.Add(file);
+                _context.ClinicFiles.Add(file);
+            }
+
+            await _context.SaveChangesAsync();
+        }
+        catch (InvalidDataException exception)
+        {
+            await _fileStorage.DeleteStoredFilesAsync(savedFiles);
+            foreach (var file in savedFiles)
+            {
+                _context.Entry(file).State = EntityState.Detached;
+            }
+
+            _context.Entry(appointment).State = EntityState.Deleted;
+            await _context.SaveChangesAsync();
+            ModelState.AddModelError("Files", exception.Message);
+            await LoadFormOptionsAsync(appointment.PetId, appointment.VeterinarianId, appointment.Status);
+            return View(appointment);
+        }
+
         TempData["Success"] = "Appointment scheduled.";
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Admin,Receptionist")]
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
@@ -73,6 +151,7 @@ public class AppointmentsController : Controller
         return View(appointment);
     }
 
+    [Authorize(Roles = "Admin,Receptionist")]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, [Bind("AppointmentId,PetId,VeterinarianId,AppointmentDate,Diagnosis,Status")] Appointment appointment)
@@ -96,6 +175,7 @@ public class AppointmentsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Admin,Receptionist")]
     [HttpGet]
     public async Task<IActionResult> Delete(int id)
     {
@@ -106,6 +186,7 @@ public class AppointmentsController : Controller
         return appointment is null ? NotFound() : View(appointment);
     }
 
+    [Authorize(Roles = "Admin,Receptionist")]
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
@@ -116,9 +197,10 @@ public class AppointmentsController : Controller
             return NotFound();
         }
 
-        if (await _context.Treatments.AnyAsync(treatment => treatment.AppointmentId == id))
+        if (await _context.Treatments.AnyAsync(treatment => treatment.AppointmentId == id)
+            || await _context.ClinicFiles.AnyAsync(file => file.AppointmentId == id))
         {
-            TempData["Error"] = "This appointment has recorded treatments and cannot be removed.";
+            TempData["Error"] = "An appointment with documents or treatments cannot be deleted.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -130,8 +212,15 @@ public class AppointmentsController : Controller
 
     private async Task LoadFormOptionsAsync(int? selectedPet = null, int? selectedVeterinarian = null, string? selectedStatus = null)
     {
-        var pets = await _context.Pets.AsNoTracking().Include(pet => pet.Owner).OrderBy(pet => pet.Name).ToListAsync();
-        ViewBag.PetId = new SelectList(pets.Select(pet => new SelectListItem
+        var pets = _context.Pets.AsNoTracking().Include(pet => pet.Owner).AsQueryable();
+        if (User.IsInRole("Client"))
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            pets = pets.Where(pet => pet.Owner!.ClientProfile!.UserId == userId);
+        }
+
+        var petList = await pets.OrderBy(pet => pet.Name).ToListAsync();
+        ViewBag.PetId = new SelectList(petList.Select(pet => new SelectListItem
         {
             Value = pet.PetId.ToString(),
             Text = $"{pet.Name} · {pet.Owner?.FirstName} {pet.Owner?.LastName}"
@@ -145,26 +234,52 @@ public class AppointmentsController : Controller
             Text = $"Dr. {vet.FirstName} {vet.LastName} · {vet.Specialty}"
         }), "Value", "Text", selectedVeterinarian);
         ViewBag.Status = new SelectList(StatusOptions, selectedStatus ?? "Confirmed");
+        ViewBag.IsClient = User.IsInRole("Client");
     }
 
     private void ValidateStatus(string status)
     {
         if (!StatusOptions.Contains(status, StringComparer.Ordinal))
         {
-            ModelState.AddModelError(nameof(Appointment.Status), "Choose a valid appointment status.");
+            ModelState.AddModelError(nameof(Appointment.Status), "Choose a valid status.");
         }
     }
 
     private async Task ValidateReferencesAsync(Appointment appointment)
     {
-        if (!await _context.Pets.AnyAsync(pet => pet.PetId == appointment.PetId))
+        var petQuery = _context.Pets.AsQueryable();
+        if (User.IsInRole("Client"))
         {
-            ModelState.AddModelError(nameof(Appointment.PetId), "Choose an existing patient.");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            petQuery = petQuery.Where(pet => pet.Owner!.ClientProfile!.UserId == userId);
+        }
+
+        if (!await petQuery.AnyAsync(pet => pet.PetId == appointment.PetId))
+        {
+            ModelState.AddModelError(nameof(Appointment.PetId), "Choose one of your pets from the list.");
         }
 
         if (!await _context.Veterinarians.AnyAsync(veterinarian => veterinarian.VeterinarianId == appointment.VeterinarianId))
         {
             ModelState.AddModelError(nameof(Appointment.VeterinarianId), "Choose an existing veterinarian.");
+        }
+    }
+
+    private void ValidateFileList(IReadOnlyCollection<IFormFile>? files)
+    {
+        if (files is null || files.Count == 0)
+        {
+            return;
+        }
+
+        if (files.Count > 5)
+        {
+            ModelState.AddModelError("Files", "You can attach up to 5 files to an appointment.");
+        }
+
+        if (files.Any(file => file.Length > FileStorageService.MaxFileSize))
+        {
+            ModelState.AddModelError("Files", "Each file must be 10 MB or smaller.");
         }
     }
 }

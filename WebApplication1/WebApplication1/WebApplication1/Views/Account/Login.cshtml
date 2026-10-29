@@ -1,5 +1,4 @@
 @model LoginViewModel
-@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment HostEnvironment
 @{
     ViewData["Title"] = "Sign in";
 }
@@ -44,10 +43,7 @@
             <button type="submit" class="btn-primary login-submit"><span aria-hidden="true">→</span> Sign in</button>
             <div class="login-protected"><span aria-hidden="true">♧</span> Your clinic information is safe and protected.</div>
         </form>
-        @if (HostEnvironment.IsDevelopment())
-        {
-            <div class="demo-credentials"><strong>Demo workspace</strong>Email: admin@vetclinic.local<br />Password: Clinic123!</div>
-        }
+        <p class="register-prompt">Don't have an account? <a asp-action="Register">Create a client account</a></p>
         <div class="auth-footer"><span>© 2026 VetClinic</span><span>Privacy · Terms of use</span></div>
     </section>
 </div>

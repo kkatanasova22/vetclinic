@@ -4,6 +4,7 @@ namespace WebApplication1.Models;
 
 public class Appointment
 {
+    // Прегледът свързва пациент, ветеринарен лекар и час.
     public int AppointmentId { get; set; }
 
     [Required, Range(1, int.MaxValue)]
@@ -24,4 +25,5 @@ public class Appointment
     public Pet? Pet { get; set; }
     public Veterinarian? Veterinarian { get; set; }
     public ICollection<Treatment> Treatments { get; set; } = new List<Treatment>();
+    public ICollection<ClinicFile> Files { get; set; } = new List<ClinicFile>();
 }

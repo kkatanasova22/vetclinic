@@ -10,11 +10,13 @@ namespace WebApplication1.Controllers;
 [Authorize(Roles = "Admin,Veterinarian")]
 public class TreatmentsController : Controller
 {
+    private const int PageSize = 10;
     private readonly VetClinicDbContext _context;
 
     public TreatmentsController(VetClinicDbContext context) => _context = context;
 
-    public async Task<IActionResult> Index(string? search)
+    // Филтърът, сортирането и страниците се изпълняват в LINQ към базата.
+    public async Task<IActionResult> Index(string? search, string? sort, int page = 1)
     {
         var treatments = _context.Treatments.AsNoTracking()
             .Include(treatment => treatment.Appointment).ThenInclude(appointment => appointment!.Pet)
@@ -28,13 +30,26 @@ public class TreatmentsController : Controller
                 || treatment.Appointment.Veterinarian!.LastName.Contains(term));
         }
 
+        page = Math.Max(1, page);
+        var total = await treatments.CountAsync();
+        var totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)PageSize));
+        page = Math.Min(page, totalPages);
+        treatments = sort switch
+        {
+            "price" => treatments.OrderBy(treatment => treatment.Price),
+            "price-desc" => treatments.OrderByDescending(treatment => treatment.Price),
+            _ => treatments.OrderByDescending(treatment => treatment.Appointment!.AppointmentDate)
+        };
         ViewData["Search"] = search;
+        ViewData["Sort"] = sort;
         ViewData["TreatmentCount"] = await _context.Treatments.CountAsync();
         ViewData["TotalValue"] = await _context.Treatments.SumAsync(treatment => (decimal?)treatment.Price) ?? 0m;
-        return View(await treatments.OrderByDescending(treatment => treatment.Appointment!.AppointmentDate).ToListAsync());
+        ViewData["PageInfo"] = new PageInfo { Page = page, TotalPages = totalPages, Search = search, Sort = sort };
+        return View(await treatments.Skip((page - 1) * PageSize).Take(PageSize).ToListAsync());
     }
 
     [HttpGet]
+    // Показва форма за процедура към вече записан час.
     public async Task<IActionResult> Create()
     {
         await LoadAppointmentsAsync();
@@ -43,6 +58,7 @@ public class TreatmentsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    // Проверява часа и цената, после записва процедурата.
     public async Task<IActionResult> Create([Bind("AppointmentId,TreatmentName,Price")] Treatment treatment)
     {
         if (!await _context.Appointments.AnyAsync(appointment => appointment.AppointmentId == treatment.AppointmentId))
@@ -63,6 +79,7 @@ public class TreatmentsController : Controller
     }
 
     [HttpGet]
+    // Зарежда процедурата и списъка с часове за промяна.
     public async Task<IActionResult> Edit(int id)
     {
         var treatment = await _context.Treatments.FindAsync(id);
@@ -77,6 +94,7 @@ public class TreatmentsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    // Запазва коригираните данни след повторна проверка.
     public async Task<IActionResult> Edit(int id, [Bind("TreatmentId,AppointmentId,TreatmentName,Price")] Treatment treatment)
     {
         if (id != treatment.TreatmentId)
@@ -102,6 +120,7 @@ public class TreatmentsController : Controller
     }
 
     [HttpGet]
+    // Показва данните за процедурата преди изтриване.
     public async Task<IActionResult> Delete(int id)
     {
         var treatment = await _context.Treatments.AsNoTracking()
@@ -112,6 +131,7 @@ public class TreatmentsController : Controller
 
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
+    // Премахва само избраната процедура.
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var treatment = await _context.Treatments.FindAsync(id);

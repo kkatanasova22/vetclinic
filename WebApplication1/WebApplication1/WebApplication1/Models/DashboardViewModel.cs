@@ -1,5 +1,6 @@
 namespace WebApplication1.Models;
 
+// Данните за картите и списъка на началната страница.
 public class DashboardViewModel
 {
     public int OwnerCount { get; set; }

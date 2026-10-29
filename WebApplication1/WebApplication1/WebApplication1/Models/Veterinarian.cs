@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebApplication1.Models;
 
+// Лекарят може да има много прегледи.
 public class Veterinarian
 {
     public int VeterinarianId { get; set; }

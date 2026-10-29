@@ -4,6 +4,7 @@ namespace WebApplication1.Models;
 
 public class Owner
 {
+    // Собственикът може да има профил за вход в системата.
     public int OwnerId { get; set; }
 
     [Required, StringLength(50, MinimumLength = 2)]
@@ -19,4 +20,6 @@ public class Owner
     public string Phone { get; set; } = string.Empty;
 
     public ICollection<Pet> Pets { get; set; } = new List<Pet>();
+
+    public ClientProfile? ClientProfile { get; set; }
 }

@@ -1,6 +1,9 @@
 @model IReadOnlyList<Pet>
 @{
     ViewData["Title"] = "Pets";
+    var speciesOptions = (IReadOnlyList<string>)ViewData["SpeciesOptions"]!;
+    var selectedSpecies = ViewData["Species"]?.ToString();
+    var selectedSort = ViewData["Sort"]?.ToString();
 }
 <section class="page-heading">
     <div><h1>Pets</h1><p>Every patient, every detail. Keep their care connected.</p><div class="heading-meta"><span><strong>@ViewData["PetCount"]</strong> patient records</span><span>Linked to their owners and visits</span></div></div>
@@ -12,7 +15,9 @@
         <div class="list-toolbar">
             <form asp-action="Index" method="get" class="search-filter">
                 <label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg><input type="search" name="search" value="@ViewData["Search"]" placeholder="Search by pet name, breed, or owner..." aria-label="Search pets" /></label>
-                <button class="btn-secondary btn-small" type="submit">Search</button>
+                <select class="filter-select" name="species" aria-label="Filter by species"><option value="">All species</option>@foreach (var option in speciesOptions) { <option value="@option" selected="@(option == selectedSpecies)">@option</option> }</select>
+                <select class="filter-select" name="sort" aria-label="Sort pets"><option value="">By name</option><option value="name-desc" selected="@(selectedSort == "name-desc")">By name (Z–A)</option><option value="species" selected="@(selectedSort == "species")">By species</option><option value="date" selected="@(selectedSort == "date")">By birth date</option></select>
+                <button class="btn-secondary btn-small" type="submit">Filter</button>
             </form>
         </div>
         <div class="table-wrap"><table class="data-table">
@@ -36,6 +41,7 @@
             }
             </tbody>
         </table></div>
-        <div class="pagination-note"><span>Showing @Model.Count patient records</span><span>Every pet is connected to an owner.</span></div>
+        <div class="pagination-note"><span>Showing @Model.Count pets</span><span>Each pet is linked to an owner.</span></div>
+        @if (ViewData["PageInfo"] is PageInfo pageInfo) { <partial name="_Pagination" model="pageInfo" /> }
     </div>
 </section>

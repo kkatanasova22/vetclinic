@@ -55,7 +55,19 @@
               "target": "Package",
               "version": "[10.0.14, )"
             },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[10.0.14, )"
+            },
             "Microsoft.EntityFrameworkCore.Sqlite": {
+              "target": "Package",
+              "version": "[10.0.14, )"
+            },
+            "SkiaSharp": {
+              "target": "Package",
+              "version": "[3.119.4, )"
+            },
+            "System.Security.Cryptography.Pkcs": {
               "target": "Package",
               "version": "[10.0.14, )"
             }

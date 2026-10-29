@@ -6,6 +6,6 @@
 <article class="confirm-card">
     <h2>Remove @Model.TreatmentName?</h2>
     <p>This removes the procedure and its price from the appointment record.</p>
-    <dl class="detail-list"><dt>Patient</dt><dd>@Model.Appointment?.Pet?.Name</dd><dt>Visit date</dt><dd>@Model.Appointment?.AppointmentDate.ToString("MMMM d, yyyy · h:mm tt")</dd><dt>Price</dt><dd>@Model.Price.ToString("N2") лв.</dd></dl>
+    <dl class="detail-list"><dt>Patient</dt><dd>@Model.Appointment?.Pet?.Name</dd><dt>Visit date</dt><dd>@Model.Appointment?.AppointmentDate.ToString("MMMM d, yyyy · h:mm tt")</dd><dt>Price</dt><dd>@Model.Price.ToString("N2") BGN</dd></dl>
     <form asp-action="Delete" asp-route-id="@Model.TreatmentId" method="post" class="form-actions"><a class="btn-secondary" asp-action="Index">Cancel</a><button type="submit" class="btn-danger">Delete treatment</button></form>
 </article>

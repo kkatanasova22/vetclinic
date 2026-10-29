@@ -45,7 +45,7 @@
                         <span>Owners</span>
                     </a>
                 }
-                @if (User.IsInRole("Admin") || User.IsInRole("Receptionist") || User.IsInRole("Veterinarian"))
+                @if (User.IsInRole("Admin") || User.IsInRole("Receptionist") || User.IsInRole("Veterinarian") || User.IsInRole("Client"))
                 {
                     <a class="nav-link @(controller == "Pets" ? "active" : "")" asp-controller="Pets" asp-action="Index">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.2c-3.4 0-6.4-1-6.4-3.5 0-2.2 2.4-4 4.4-5.1.8-.5 1.4-.7 2-.7s1.2.2 2 .7c2 1.1 4.4 2.9 4.4 5.1 0 2.5-3 3.5-6.4 3.5Z"/><circle cx="5.4" cy="8.4" r="1.8"/><circle cx="9.4" cy="5.7" r="1.8"/><circle cx="14.6" cy="5.7" r="1.8"/><circle cx="18.6" cy="8.4" r="1.8"/></svg>
@@ -59,7 +59,7 @@
                         <span>Veterinarians</span>
                     </a>
                 }
-                @if (User.IsInRole("Admin") || User.IsInRole("Receptionist"))
+                @if (User.IsInRole("Admin") || User.IsInRole("Receptionist") || User.IsInRole("Client"))
                 {
                     <a class="nav-link @(controller == "Appointments" ? "active" : "")" asp-controller="Appointments" asp-action="Index">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="15" rx="2"/><path d="M7.5 3.5v4m9-4v4m-13 2.5h17M8 12h2m4 0h2m-8 4h2"/></svg>
@@ -99,7 +99,7 @@
                     <span class="today-date">@DateTime.Now.ToString("dddd, MMMM d, yyyy")</span>
                     <button class="icon-button" type="button" aria-label="Notifications"><span aria-hidden="true">♧</span><i></i></button>
                     <span class="user-avatar">@userInitial</span>
-                    <span class="user-menu"><strong>@userName.Split('@')[0]</strong><small>Clinic staff</small></span>
+                    <span class="user-menu"><strong>@userName.Split('@')[0]</strong><small>@(User.IsInRole("Client") ? "Client" : "Clinic team")</small></span>
                     <span class="switch-chevron">⌄</span>
                 </div>
             </header>

@@ -6,6 +6,7 @@ namespace WebApplication1.Data;
 
 public static class SeedData
 {
+    // Добавя начални данни и роли само ако още липсват.
     public static async Task InitializeAsync(
         IServiceProvider services,
         bool isDevelopment,
@@ -66,7 +67,7 @@ public static class SeedData
         }
 
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        foreach (var roleName in new[] { "Admin", "Veterinarian", "Receptionist" })
+        foreach (var roleName in new[] { "Admin", "Veterinarian", "Receptionist", "Client" })
         {
             if (!await roleManager.RoleExistsAsync(roleName))
             {
@@ -79,8 +80,9 @@ public static class SeedData
             return;
         }
 
-        var email = configuration["DemoAdmin:Email"];
-        var password = configuration["DemoAdmin:Password"];
+        // Администратор се създава само с настройки от средата, без парола в кода.
+        var email = configuration["BootstrapAdmin:Email"];
+        var password = configuration["BootstrapAdmin:Password"];
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
         {
             return;

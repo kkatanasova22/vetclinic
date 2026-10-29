@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebApplication1.Models;
 
+// Данните, които формата за вход проверява.
 public class LoginViewModel
 {
     [Required, EmailAddress]

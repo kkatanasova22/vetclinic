@@ -4,13 +4,13 @@
     var totalValue = Convert.ToDecimal(ViewData["TotalValue"]);
 }
 <section class="page-heading">
-    <div><h1>Treatments</h1><p>Record procedures and costs as part of every visit.</p><div class="heading-meta"><span><strong>@ViewData["TreatmentCount"]</strong> recorded procedures</span><span><strong>@totalValue.ToString("N2") лв.</strong> total value</span></div></div>
+    <div><h1>Treatments</h1><p>Record procedures and costs as part of every visit.</p><div class="heading-meta"><span><strong>@ViewData["TreatmentCount"]</strong> recorded procedures</span><span><strong>@totalValue.ToString("N2") BGN</strong> total value</span></div></div>
     <div class="heading-actions"><a class="btn-primary" asp-action="Create"><span aria-hidden="true">＋</span> Add treatment</a></div>
 </section>
 <section class="panel">
     <div class="panel-header"><div><h2>Procedure history</h2><p>Every treatment is linked to an appointment.</p></div><span class="result-count">@Model.Count procedures</span></div>
     <div class="panel-body">
-        <div class="list-toolbar"><form asp-action="Index" method="get" class="search-filter"><label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg><input type="search" name="search" value="@ViewData["Search"]" placeholder="Search by treatment, pet, or veterinarian..." aria-label="Search treatments" /></label><button class="btn-secondary btn-small" type="submit">Search</button></form></div>
+        <div class="list-toolbar"><form asp-action="Index" method="get" class="search-filter"><label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg><input type="search" name="search" value="@ViewData["Search"]" placeholder="Search by treatment, pet, or veterinarian..." aria-label="Search treatments" /></label><select class="filter-select" name="sort"><option value="">By date</option><option value="price" selected="@(ViewData["Sort"]?.ToString() == "price")">Lowest price</option><option value="price-desc" selected="@(ViewData["Sort"]?.ToString() == "price-desc")">Highest price</option></select><button class="btn-secondary btn-small" type="submit">Search</button></form></div>
         <div class="table-wrap"><table class="data-table">
             <thead><tr><th>Procedure</th><th>Patient</th><th>Visit date</th><th>Veterinarian</th><th>Price</th><th>Actions</th></tr></thead>
             <tbody>
@@ -22,11 +22,12 @@
             {
                 @foreach (var treatment in Model)
                 {
-                    <tr><td><span class="table-primary">@treatment.TreatmentName</span><span class="table-secondary">Procedure #@treatment.TreatmentId</span></td><td>@treatment.Appointment?.Pet?.Name</td><td>@treatment.Appointment?.AppointmentDate.ToString("MMM d, yyyy")</td><td>Dr. @treatment.Appointment?.Veterinarian?.FirstName @treatment.Appointment?.Veterinarian?.LastName</td><td><span class="table-primary">@treatment.Price.ToString("N2") лв.</span></td><td><div class="table-actions"><a class="action-link" asp-action="Edit" asp-route-id="@treatment.TreatmentId" title="Edit treatment" aria-label="Edit @treatment.TreatmentName">✎</a><a class="action-link delete" asp-action="Delete" asp-route-id="@treatment.TreatmentId" title="Delete treatment" aria-label="Delete @treatment.TreatmentName">⌫</a></div></td></tr>
+                    <tr><td><span class="table-primary">@treatment.TreatmentName</span><span class="table-secondary">Procedure #@treatment.TreatmentId</span></td><td>@treatment.Appointment?.Pet?.Name</td><td>@treatment.Appointment?.AppointmentDate.ToString("MMM d, yyyy")</td><td>Dr. @treatment.Appointment?.Veterinarian?.FirstName @treatment.Appointment?.Veterinarian?.LastName</td><td><span class="table-primary">@treatment.Price.ToString("N2") BGN</span></td><td><div class="table-actions"><a class="action-link" asp-action="Edit" asp-route-id="@treatment.TreatmentId" title="Edit treatment" aria-label="Edit @treatment.TreatmentName">✎</a><a class="action-link delete" asp-action="Delete" asp-route-id="@treatment.TreatmentId" title="Delete treatment" aria-label="Delete @treatment.TreatmentName">⌫</a></div></td></tr>
                 }
             }
             </tbody>
         </table></div>
         <div class="pagination-note"><span>Showing @Model.Count procedures</span><span>Prices cannot be negative.</span></div>
+        @if (ViewData["PageInfo"] is PageInfo pageInfo) { <partial name="_Pagination" model="pageInfo" /> }
     </div>
 </section>

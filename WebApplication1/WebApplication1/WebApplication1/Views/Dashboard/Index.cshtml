@@ -10,7 +10,7 @@
         <h1>@greeting, @User.Identity?.Name?.Split('@')[0]!</h1>
         <p>Here’s what’s happening at your clinic today.</p>
     </div>
-    @if (User.IsInRole("Admin") || User.IsInRole("Receptionist"))
+    @if (User.IsInRole("Admin") || User.IsInRole("Receptionist") || User.IsInRole("Client"))
     {
         <div class="heading-actions"><a class="btn-primary" asp-controller="Appointments" asp-action="Create"><span aria-hidden="true">＋</span> Add appointment</a></div>
     }
@@ -18,11 +18,11 @@
 
 <section class="stats-grid" aria-label="Clinic overview">
     <article class="stat-card">
-        <div><div class="stat-label">Total owners</div><div class="stat-value">@Model.OwnerCount</div><div class="stat-note">Registered in your clinic</div></div>
+        <div><div class="stat-label">@(User.IsInRole("Client") ? "My profile" : "Total owners")</div><div class="stat-value">@Model.OwnerCount</div><div class="stat-note">Registered in your clinic</div></div>
         <span class="stat-icon" aria-hidden="true">♧</span>
     </article>
     <article class="stat-card">
-        <div><div class="stat-label">Total pets</div><div class="stat-value">@Model.PetCount</div><div class="stat-note">Patient records</div></div>
+        <div><div class="stat-label">@(User.IsInRole("Client") ? "My pets" : "Total pets")</div><div class="stat-value">@Model.PetCount</div><div class="stat-note">Patient records</div></div>
         <span class="stat-icon" aria-hidden="true">♡</span>
     </article>
     <article class="stat-card">
@@ -78,9 +78,12 @@
         <article class="panel">
             <div class="panel-header"><div><h2>Quick actions</h2><p>Common clinic tasks</p></div></div>
             <div class="quick-actions">
-                @if (User.IsInRole("Admin") || User.IsInRole("Receptionist"))
+                @if (User.IsInRole("Admin") || User.IsInRole("Receptionist") || User.IsInRole("Client"))
                 {
                     <a class="btn-primary" asp-controller="Appointments" asp-action="Create"><span aria-hidden="true">▣</span> Add appointment</a>
+                }
+                @if (User.IsInRole("Admin") || User.IsInRole("Receptionist"))
+                {
                     <a class="btn-secondary" asp-controller="Owners" asp-action="Create"><span aria-hidden="true">＋</span> Create owner</a>
                 }
                 <a class="btn-secondary" asp-controller="Pets" asp-action="Create"><span aria-hidden="true">♡</span> Add pet</a>

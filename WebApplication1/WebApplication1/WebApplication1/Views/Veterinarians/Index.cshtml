@@ -9,7 +9,7 @@
 <section class="panel">
     <div class="panel-header"><div><h2>Medical team</h2><p>Manage veterinarian details and specialties.</p></div><span class="result-count">@Model.Count veterinarians</span></div>
     <div class="panel-body">
-        <div class="list-toolbar"><form asp-action="Index" method="get" class="search-filter"><label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg><input type="search" name="search" value="@ViewData["Search"]" placeholder="Search by name or specialty..." aria-label="Search veterinarians" /></label><button class="btn-secondary btn-small" type="submit">Search</button></form></div>
+        <div class="list-toolbar"><form asp-action="Index" method="get" class="search-filter"><label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg><input type="search" name="search" value="@ViewData["Search"]" placeholder="Search by name or specialty..." aria-label="Search veterinarians" /></label><select class="filter-select" name="sort"><option value="">By name</option><option value="specialty" selected="@(ViewData["Sort"]?.ToString() == "specialty")">By specialty</option></select><button class="btn-secondary btn-small" type="submit">Search</button></form></div>
         <div class="table-wrap"><table class="data-table">
             <thead><tr><th>Veterinarian</th><th>Specialty</th><th>Appointments</th><th>Actions</th></tr></thead>
             <tbody>
@@ -26,6 +26,7 @@
             }
             </tbody>
         </table></div>
-        <div class="pagination-note"><span>Showing @Model.Count veterinarians</span><span>Staff information is managed by clinic administrators.</span></div>
+        <div class="pagination-note"><span>Showing @Model.Count veterinarians</span><span>Veterinarians are managed by the administrator.</span></div>
+        @if (ViewData["PageInfo"] is PageInfo pageInfo) { <partial name="_Pagination" model="pageInfo" /> }
     </div>
 </section>

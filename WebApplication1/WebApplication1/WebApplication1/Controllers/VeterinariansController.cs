@@ -9,11 +9,13 @@ namespace WebApplication1.Controllers;
 [Authorize(Roles = "Admin")]
 public class VeterinariansController : Controller
 {
+    private const int PageSize = 10;
     private readonly VetClinicDbContext _context;
 
     public VeterinariansController(VetClinicDbContext context) => _context = context;
 
-    public async Task<IActionResult> Index(string? search)
+    // Търсим по лекар или специалност и връщаме само избраната страница.
+    public async Task<IActionResult> Index(string? search, string? sort, int page = 1)
     {
         var veterinarians = _context.Veterinarians.AsNoTracking().Include(vet => vet.Appointments).AsQueryable();
         if (!string.IsNullOrWhiteSpace(search))
@@ -24,16 +26,27 @@ public class VeterinariansController : Controller
                 || (vet.Specialty != null && vet.Specialty.Contains(term)));
         }
 
+        page = Math.Max(1, page);
+        var total = await veterinarians.CountAsync();
+        var totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)PageSize));
+        page = Math.Min(page, totalPages);
+        veterinarians = sort == "specialty"
+            ? veterinarians.OrderBy(vet => vet.Specialty).ThenBy(vet => vet.LastName)
+            : veterinarians.OrderBy(vet => vet.LastName).ThenBy(vet => vet.FirstName);
         ViewData["Search"] = search;
+        ViewData["Sort"] = sort;
         ViewData["VeterinarianCount"] = await _context.Veterinarians.CountAsync();
-        return View(await veterinarians.OrderBy(vet => vet.LastName).ThenBy(vet => vet.FirstName).ToListAsync());
+        ViewData["PageInfo"] = new PageInfo { Page = page, TotalPages = totalPages, Search = search, Sort = sort };
+        return View(await veterinarians.Skip((page - 1) * PageSize).Take(PageSize).ToListAsync());
     }
 
     [HttpGet]
+    // Показва празна форма за нов лекар.
     public IActionResult Create() => View(new Veterinarian());
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    // Проверява задължителните полета и записва лекаря.
     public async Task<IActionResult> Create([Bind("FirstName,LastName,Specialty")] Veterinarian veterinarian)
     {
         if (!ModelState.IsValid)
@@ -48,6 +61,7 @@ public class VeterinariansController : Controller
     }
 
     [HttpGet]
+    // Зарежда лекаря за редакция.
     public async Task<IActionResult> Edit(int id)
     {
         var veterinarian = await _context.Veterinarians.FindAsync(id);
@@ -56,6 +70,7 @@ public class VeterinariansController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    // Запазва новите данни за лекаря.
     public async Task<IActionResult> Edit(int id, [Bind("VeterinarianId,FirstName,LastName,Specialty")] Veterinarian veterinarian)
     {
         if (id != veterinarian.VeterinarianId)
@@ -75,6 +90,7 @@ public class VeterinariansController : Controller
     }
 
     [HttpGet]
+    // Показва лекаря преди изтриване.
     public async Task<IActionResult> Delete(int id)
     {
         var veterinarian = await _context.Veterinarians.AsNoTracking()
@@ -84,6 +100,7 @@ public class VeterinariansController : Controller
 
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
+    // Запазва историята на часовете и спира изтриване на използван лекар.
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var veterinarian = await _context.Veterinarians.FindAsync(id);
