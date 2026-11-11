@@ -73,6 +73,13 @@
                         <span>Treatments</span>
                     </a>
                 }
+                @if (User.IsInRole("Admin"))
+                {
+                    <a class="nav-link @(controller == "Reports" ? "active" : "")" asp-controller="Reports" asp-action="Index">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10m5 10V5m5 15v-7m5 7V8"/><path d="M2.5 20.5h19"/></svg>
+                        <span>Reports</span>
+                    </a>
+                }
             </nav>
 
             <div class="sidebar-spacer"></div>

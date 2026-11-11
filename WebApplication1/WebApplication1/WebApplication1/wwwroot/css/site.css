@@ -310,6 +310,26 @@ body { font-size: 15px; }
 .page-links { display: flex; align-items: center; justify-content: center; gap: 12px; padding-top: 12px; color: #718091; font-size: 12px; }
 .file-link { display: block; margin-top: 4px; color: #287da5; font-size: 11px; overflow-wrap: anywhere; }
 .file-thumbnail { width: 56px; height: 56px; margin: 5px 5px 0 0; border: 1px solid var(--line); border-radius: 7px; object-fit: cover; vertical-align: middle; }
+.report-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.report-year-form { display: flex; align-items: center; gap: 7px; }
+.report-year-form label { color: #788595; font-size: 12px; font-weight: 600; }
+.report-year-form .filter-select { min-width: 82px; }
+.report-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr); gap: 14px; align-items: start; }
+.report-chart-legend { display: flex; align-items: center; gap: 7px; margin-bottom: 14px; color: #718091; font-size: 11px; }
+.report-legend-dot { width: 9px; height: 9px; border-radius: 50%; background: #3198c3; }
+.report-month-chart { display: grid; gap: 9px; }
+.report-month-row { display: grid; grid-template-columns: 36px minmax(60px, 1fr) 76px 70px; align-items: center; gap: 10px; }
+.report-month-name, .report-month-count { color: #788595; font-size: 11px; }
+.report-month-count { text-align: right; }
+.report-month-value { color: #344255; font-size: 11px; text-align: right; }
+.report-bar-track, .report-service-track { height: 9px; overflow: hidden; border-radius: 99px; background: #edf2f6; }
+.report-bar, .report-service-bar { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #48b8d4, #3779b8); }
+.report-note { margin: 15px 0 0; color: #8995a2; font-size: 10px; line-height: 1.5; }
+.report-services { display: grid; gap: 17px; }
+.report-service-heading { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 7px; }
+.report-service-heading strong { color: #344255; font-size: 12px; }
+.report-service-heading span, .report-service-value { color: #8995a2; font-size: 10px; }
+.report-service-value { margin-top: 5px; text-align: right; }
 
 @media (max-width: 600px) {
   .page-content { zoom: 1.02; }
@@ -317,4 +337,9 @@ body { font-size: 15px; }
   .register-card .form-grid { grid-template-columns: 1fr; }
   .register-card .form-group.full { grid-column: auto; }
   .page-links { flex-wrap: wrap; }
+  .report-actions { align-items: stretch; width: 100%; }
+  .report-year-form { width: 100%; }
+  .report-grid { grid-template-columns: 1fr; }
+  .report-month-row { grid-template-columns: 32px minmax(45px, 1fr) 64px; gap: 7px; }
+  .report-month-count { display: none; }
 }

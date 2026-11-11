@@ -1,0 +1,98 @@
+@model ReportsViewModel
+@{
+    ViewData["Title"] = "Reports";
+}
+
+<section class="page-heading">
+    <div>
+        <h1>Reports &amp; analytics</h1>
+        <p>Review clinic activity, estimated revenue, and popular services.</p>
+    </div>
+    <div class="report-actions">
+        <form asp-action="Index" method="get" class="report-year-form">
+            <label for="year">Year</label>
+            <select id="year" name="year" class="filter-select">
+                @foreach (var availableYear in Model.AvailableYears)
+                {
+                    <option value="@availableYear" selected="@(availableYear == Model.Year)">@availableYear</option>
+                }
+            </select>
+            <button class="btn-secondary btn-small" type="submit">Show</button>
+        </form>
+        <a class="btn-secondary" asp-action="ExportExcel" asp-route-year="@Model.Year">Export Excel</a>
+        <a class="btn-primary" asp-action="ExportPdf" asp-route-year="@Model.Year">Export PDF</a>
+    </div>
+</section>
+
+<section class="stats-grid report-stats" aria-label="Annual report summary">
+    <article class="stat-card">
+        <div><div class="stat-label">Appointments</div><div class="stat-value">@Model.AppointmentCount</div><div class="stat-note">Scheduled during @Model.Year</div></div>
+        <span class="stat-icon" aria-hidden="true">▣</span>
+    </article>
+    <article class="stat-card">
+        <div><div class="stat-label">Completed appointments</div><div class="stat-value">@Model.CompletedAppointmentCount</div><div class="stat-note">Marked as completed</div></div>
+        <span class="stat-icon" aria-hidden="true">✓</span>
+    </article>
+    <article class="stat-card">
+        <div><div class="stat-label">Recorded treatments</div><div class="stat-value">@Model.TreatmentCount</div><div class="stat-note">For non-cancelled visits</div></div>
+        <span class="stat-icon" aria-hidden="true">✚</span>
+    </article>
+    <article class="stat-card">
+        <div><div class="stat-label">Estimated revenue</div><div class="stat-value">@Model.TotalTreatmentValue.ToString("N2")</div><div class="stat-note">BGN · @Model.Year</div></div>
+        <span class="stat-icon" aria-hidden="true">¤</span>
+    </article>
+</section>
+
+<section class="report-grid">
+    <article class="panel">
+        <div class="panel-header">
+            <div><h2>Monthly service revenue</h2><p>Procedure prices grouped by appointment month</p></div>
+            <span class="result-count">@Model.Year</span>
+        </div>
+        <div class="panel-body">
+            <div class="report-chart-legend"><span class="report-legend-dot"></span> Estimated revenue (BGN)</div>
+            <div class="report-month-chart" role="list" aria-label="Monthly service revenue chart">
+                @foreach (var month in Model.Months)
+                {
+                    <div class="report-month-row" role="listitem">
+                        <span class="report-month-name">@month.MonthName</span>
+                        <div class="report-bar-track" role="img" aria-label="@month.MonthName: @month.TreatmentValue.ToString("N2") BGN">
+                            <span class="report-bar" style="width: @(month.ValueBarWidth)%;"></span>
+                        </div>
+                        <strong class="report-month-value">@month.TreatmentValue.ToString("N2")</strong>
+                        <span class="report-month-count">@month.AppointmentCount appts</span>
+                    </div>
+                }
+            </div>
+            <p class="report-note">Estimated revenue is the sum of recorded procedure prices for non-cancelled appointments. Payment transactions are not stored in this system.</p>
+        </div>
+    </article>
+
+    <article class="panel">
+        <div class="panel-header">
+            <div><h2>Most requested services</h2><p>Top five by recorded treatment count</p></div>
+        </div>
+        <div class="panel-body report-services">
+            @if (Model.TopServices.Count == 0)
+            {
+                <p class="empty-state">No treatments were recorded for this year.</p>
+            }
+            else
+            {
+                @foreach (var service in Model.TopServices)
+                {
+                    <div class="report-service-row">
+                        <div class="report-service-heading">
+                            <strong>@service.Name</strong>
+                            <span>@service.RequestCount requests</span>
+                        </div>
+                        <div class="report-service-track" role="img" aria-label="@service.Name: @service.RequestCount requests">
+                            <span class="report-service-bar" style="width: @(service.BarWidth)%;"></span>
+                        </div>
+                        <div class="report-service-value">@service.TotalValue.ToString("N2") BGN revenue</div>
+                    </div>
+                }
+            }
+        </div>
+    </article>
+</section>
